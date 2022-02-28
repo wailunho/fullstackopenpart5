@@ -1,6 +1,6 @@
 import './notification.css'
 
-const Notification = ({message, type}) => {
+const Notification = ({ message, type }) => {
   if (!message) {
     return null
   }
