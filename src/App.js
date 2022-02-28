@@ -21,7 +21,7 @@ const App = () => {
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
-      setBlogs(blogs),
+      setBlogs(getSortedBlogsByLikes(blogs)),
     )
   }, [])
 
@@ -33,6 +33,10 @@ const App = () => {
       blogService.setToken(u.token)
     }
   }, [])
+
+  const getSortedBlogsByLikes = (blogs) => {
+    return blogs.sort((a, b) => b.likes - a.likes)
+  }
 
   const showMsg = (msg) => {
     setMessage(msg)
@@ -47,6 +51,14 @@ const App = () => {
   const showErrorMsg = (msg) => {
     setMessageType(MESSAGE_TYPE_ERROR)
     showMsg(msg)
+  }
+
+  const handleError = (e) => {
+    if (e.response && e.response.data && e.response.data.error) {
+      showErrorMsg(e.response.data.error)
+    } else {
+      showErrorMsg(e.message)
+    }
   }
 
   const handleLogout = () => {
@@ -76,21 +88,46 @@ const App = () => {
     try {
       const c = addBlogFormRef.current
       const newBlog = await blogService.create({
-        title:c.title,
+        title: c.title,
         author: c.author,
-        url: c.url
+        url: c.url,
       })
-      setBlogs(blogs.concat(newBlog))
+      setBlogs(getSortedBlogsByLikes(blogs.concat(newBlog)))
       showSuccessMsg(`a new blog ${newBlog.title} by ${newBlog.author} added`)
       c.setTitle('')
       c.setAuthor('')
       c.setUrl('')
       setIsBlogFormVisible(false)
     } catch (e) {
-      if (e.response && e.response.data && e.response.data.error) {
-        showErrorMsg(e.response.data.error)
-      } else {
-        showErrorMsg(e.message)
+      handleError(e)
+    }
+  }
+
+  const handleLike = (blog) => {
+    return async (e) => {
+      e.preventDefault()
+      try {
+        const id = blog.id
+        const newObj = Object.assign({}, blog, { likes: blog.likes + 1 })
+        await blogService.update(id, newObj)
+        setBlogs(getSortedBlogsByLikes(blogs.map(x => x.id === id ? newObj : x)))
+      } catch (e) {
+        handleError(e)
+      }
+    }
+  }
+
+  const handleDelete = (blog) => {
+    return async (e) => {
+      e.preventDefault()
+      try {
+        if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
+          const id = blog.id
+          await blogService.remove(id)
+          setBlogs(getSortedBlogsByLikes(blogs.filter(x => x.id !== id)))
+        }
+      } catch (e) {
+        handleError(e)
       }
     }
   }
@@ -116,13 +153,13 @@ const App = () => {
         <Notification message={message} type={messageType} />
         <div>{user.name} logged in <button onClick={handleLogout}>logout</button></div>
         <br></br>
-        <button style={{display: isBlogFormVisible ? 'none': ''}} onClick={() => setIsBlogFormVisible(true)}>new note</button>
+        <button style={{ display: isBlogFormVisible ? 'none' : '' }} onClick={() => setIsBlogFormVisible(true)}>new blog</button>
         <div style={{ display: isBlogFormVisible ? '' : 'none' }}>
-          <AddBlogForm ref={addBlogFormRef} handleAddBlog={handleAddBlog}/>
+          <AddBlogForm ref={addBlogFormRef} handleAddBlog={handleAddBlog} />
         </div>
-        <button style={{display: isBlogFormVisible? '': 'none'}} onClick={() => setIsBlogFormVisible(false)}>cancel</button>
+        <button style={{ display: isBlogFormVisible ? '' : 'none' }} onClick={() => setIsBlogFormVisible(false)}>cancel</button>
         {blogs.map(blog =>
-          <Blog key={blog.id} blog={blog} />,
+          <Blog key={blog.id} handleLike={handleLike} handleDelete={handleDelete} blog={blog} currentUser={user}/>,
         )}
       </div>
     )
