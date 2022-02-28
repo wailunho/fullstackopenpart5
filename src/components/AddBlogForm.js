@@ -1,20 +1,21 @@
-import React, { useState } from 'react'
+import { useState, forwardRef, useImperativeHandle } from 'react'
 
-const AddBlogForm = ({ handleAddBlog }) => {
+const AddBlogForm = forwardRef((props, ref) => {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    await handleAddBlog(title, author, url)
-    setTitle('')
-    setAuthor('')
-    setUrl('')
-  }
+  useImperativeHandle(ref, () => ({
+    title,
+    author,
+    url,
+    setTitle,
+    setAuthor,
+    setUrl,
+  }))
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={props.handleAddBlog}>
       <h2>create new</h2>
       <div>title:<input value={title} onChange={({ target }) => setTitle(target.value)} /></div>
       <div>author:<input value={author} onChange={({ target }) => setAuthor(target.value)} /></div>
@@ -22,6 +23,6 @@ const AddBlogForm = ({ handleAddBlog }) => {
       <button type="submit">create</button>
     </form>
   )
-}
+})
 
 export default AddBlogForm

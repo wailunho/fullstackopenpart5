@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
 import AddBlogForm from './components/AddBlogForm'
 import Notification from './components/Notification'
@@ -15,6 +15,9 @@ const App = () => {
   const [user, setUser] = useState(null)
   const [message, setMessage] = useState('')
   const [messageType, setMessageType] = useState(MESSAGE_TYPE_SUCCESS)
+  const [isBlogFormVisible, setIsBlogFormVisible] = useState(false)
+
+  const addBlogFormRef = useRef()
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -68,11 +71,21 @@ const App = () => {
     }
   }
 
-  const handleAddBlog = async (title, author, url) => {
+  const handleAddBlog = async (e) => {
+    e.preventDefault()
     try {
-      const newBlog = await blogService.create({ title, author, url })
+      const c = addBlogFormRef.current
+      const newBlog = await blogService.create({
+        title:c.title,
+        author: c.author,
+        url: c.url
+      })
       setBlogs(blogs.concat(newBlog))
       showSuccessMsg(`a new blog ${newBlog.title} by ${newBlog.author} added`)
+      c.setTitle('')
+      c.setAuthor('')
+      c.setUrl('')
+      setIsBlogFormVisible(false)
     } catch (e) {
       if (e.response && e.response.data && e.response.data.error) {
         showErrorMsg(e.response.data.error)
@@ -103,7 +116,11 @@ const App = () => {
         <Notification message={message} type={messageType} />
         <div>{user.name} logged in <button onClick={handleLogout}>logout</button></div>
         <br></br>
-        <AddBlogForm handleAddBlog={handleAddBlog} />
+        <button style={{display: isBlogFormVisible ? 'none': ''}} onClick={() => setIsBlogFormVisible(true)}>new note</button>
+        <div style={{ display: isBlogFormVisible ? '' : 'none' }}>
+          <AddBlogForm ref={addBlogFormRef} handleAddBlog={handleAddBlog}/>
+        </div>
+        <button style={{display: isBlogFormVisible? '': 'none'}} onClick={() => setIsBlogFormVisible(false)}>cancel</button>
         {blogs.map(blog =>
           <Blog key={blog.id} blog={blog} />,
         )}
