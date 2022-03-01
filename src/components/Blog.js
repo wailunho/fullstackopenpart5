@@ -17,10 +17,10 @@ const Blog = ({ blog, handleLike, handleDelete, currentUser }) => {
   }
 
   return (
-    <div style={blogStyle}>
-      {blog.title} {blog.author}
+    <div className="blog" style={blogStyle}>
+      <div className="blog-title-and-author">{blog.title} {blog.author}</div>
       <button type="button" onClick={handleToggleView}>{isShown ? 'hide' : 'view'}</button>
-      <div style={{ display: isShown ? '' : 'none' }}>
+      <div className="blog-detail" style={{ display: isShown ? '' : 'none' }}>
         <div>{blog.url}</div>
         <div>likes {blog.likes}
           <button onClick={handleLike(blog)}>like</button>
