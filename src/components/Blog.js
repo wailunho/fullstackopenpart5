@@ -23,7 +23,7 @@ const Blog = ({ blog, handleLike, handleDelete, currentUser }) => {
       <div className="blog-detail" style={{ display: isShown ? '' : 'none' }}>
         <div>{blog.url}</div>
         <div>likes {blog.likes}
-          <button onClick={handleLike(blog)}>like</button>
+          <button className="blog-like-btn" onClick={handleLike(blog)}>like</button>
         </div>
         <div>{blog.user.name}</div>
         <div style={{ display: currentUser.username === blog.user.username ? '' : 'none' }}>
