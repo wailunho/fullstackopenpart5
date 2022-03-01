@@ -137,9 +137,9 @@ const App = () => {
       <div>
         <h2>Log in to application</h2>
         <Notification message={message} type={messageType} />
-        <form onSubmit={handleLogin}>
-          <div>username <input onChange={({ target }) => setUsername(target.value)} value={username} /></div>
-          <div>password <input type="password" onChange={({ target }) => setPassword(target.value)} value={password} /></div>
+        <form id="login" onSubmit={handleLogin}>
+          <div>username <input id="username" onChange={({ target }) => setUsername(target.value)} value={username} /></div>
+          <div>password <input id="password" type="password" onChange={({ target }) => setPassword(target.value)} value={password} /></div>
           <div>
             <button type="submit">login</button>
           </div>
